@@ -1,0 +1,200 @@
+<style>
+
+.salaSecciones{
+   display: table-cell;
+}
+
+</style>
+
+  <div class="salaSecciones">
+  <ul>ID del juego: {{groups.groupID}} </ul>
+ <ul> Host : {{groups.host}} </ul>
+ <ul>Eres {{ user.name }}, acciones:</ul>
+
+<ul> 
+
+<form method="post" action="app/../salaCrea/backToHome">
+  <input type="submit"  value="Salir"/>
+</form>
+
+<form method="post" action="app/../SIN_ASIGNAR">
+  <input type="submit"  value="Abandonar juego (e.g.)"/>
+</form>
+
+<form method="post" action="app/../SIN_ASIGNAR">
+  <input type="submit"  value="Pasar Turno"/>
+</form>
+
+</ul>
+   <ul> Integrantes : {{ groups.memberNum }} </ul>
+<ul>    
+    Miembros:
+     {{#each members as |algo|}}
+    <li>
+      
+     Nombre {{algo}} <br> 
+     Status de turno {{algo}} <br> 
+     Status: En juego <br> <br> 
+     Puntos de victoria: 0 pts <br> 
+     Rutas/carretera conectadas: 2 <br> 
+     Pueblos: 2 <br> 
+     Ciudades: 0 <br> 
+     Madera: 1 <br> 
+     Piedra: 0 <br> 
+     Arcilla: 2 <br> 
+     Trigo: 1 <br> 
+
+      <form method="post" action="app/../SIN_ASIGNAR">
+  <input type="submit"  value="Kick (e.g.)"/>
+</form>
+
+    </li>
+   
+    {{/each}}
+    
+    </ul>
+
+</div>
+
+
+
+{{!
+<script>
+  const socket = io.connect('http://localhost:8080');
+  socket.on('news', (data) => {
+   let datos = JSON.stringify(data);
+    console.log(datos+" desde el hbs");
+    socket.emit('my other event', { my: 'data' });
+  });
+</script>
+ }}
+
+
+{{!  -***********************************************}}
+
+<div  class="salaSecciones">
+  <h3>Chat de la sala</h3>
+  <script src="/socket.io/socket.io.js"></script>
+
+
+ <script>
+var socket = io.connect('http://localhost:8080', { 'forceNew': true });
+
+socket.on('messages', function(data) {
+  console.log(JSON.stringify(data) +" desde hbs");
+  render(data);
+})
+
+function render (data) {
+    console.log("render de hbs");
+  var html = data.map(function(elem, index) {
+    return(`<div clas="normal">
+              <strong clas="normal">${elem.author}</strong>:
+              <em clas="normal">${elem.text}</em>
+            </div>`);
+  }).join(" ");
+  document.getElementById('chatNormal').innerHTML = html;
+}
+
+function addMessage(e) {
+  var message = {
+    author: document.getElementById('username').value,
+    text: document.getElementById('texto').value
+  };
+  console.log(JSON.stringify(message)+" func add");
+  socket.emit('new-message', message);
+  return false;
+}
+
+ </script>
+
+<body>
+  <div id="chatNormal"></div>
+  <br/>
+  <form onsubmit="return addMessage(this)">
+    <input readonly type="text" id="username" value={{user.name}}>
+    <input type="text" id="texto" placeholder="Escribe algo...">
+    <input type="submit" value="Enviar!">
+  </form>
+</body>
+
+
+</div>
+
+
+{{!  -***********************************************}}
+
+<div  class="salaSecciones">
+  <h3>Chat Pirata</h3>
+  <script src="/socket.io/socket.io.js"></script>
+      <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+ <script   >
+   
+var socket = io.connect('http://localhost:8080', { 'forceNew': true });
+//detecta pushes del server y despliega
+socket.on('messagesPir', function(data) {
+  console.log(JSON.stringify(data) +" desde hbs");
+  render(data);
+})
+
+function render (data) {
+    console.log("render de hbs");
+  var html = data.map(function(elem, index) {
+    return(`<div clas="pirata">
+              <strong clas="pirata">${elem.author}</strong>:
+              <em clas="pirata">${elem.text}</em>
+            </div>`);
+  }).join(" ");
+  document.getElementById('messagesPir').innerHTML = html;
+}
+
+function translate(auth, str){
+  console.log("Boop");
+   console.log(str);
+
+    $.ajax({
+        method:"POST",
+        url:"app/../translate-yarg",
+        data:{texto: str}
+    })
+    .done(function(data){
+        console.log(data+ " en pirata");
+
+  var final = {
+    author : auth,
+    text : data
+  }
+
+         socket.emit('new-messagePir', final);
+        return data;
+    });
+}
+
+function addMessagePir(e) {
+  var messagePir = {
+    author: document.getElementById('usernamePir').value,
+    text: document.getElementById('textoPir').value
+  };
+    var temp = translate(messagePir.author,messagePir.text);
+    messagePir.text = temp;
+
+ // socket.emit('new-messagePir', messagePir);
+  return false;
+}
+
+ </script>
+
+<body>
+  <div id="messagesPir"></div>
+  <br/>
+  <form onsubmit="return addMessagePir(this)">
+    <input readonly type="text" id="usernamePir" value={{user.name}} >
+    <input type="text" id="textoPir" placeholder="English only...">
+   <button type="submit">Pirate!</button>
+  </form>
+</body>
+
+
+</div>
+
